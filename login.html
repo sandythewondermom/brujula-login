@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>La Brújula del Lenguaje — Acceso</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #FAF7F2;
+      --ink: #1A1714;
+      --rust: #B84C2B;
+      --rust-light: #D9694A;
+      --muted: #7A7068;
+      --border: #E2DDD6;
+      --card: #FFFFFF;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .brand-compass {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+
+    .brand-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.75rem;
+      font-weight: 300;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+    }
+
+    .brand-title em {
+      font-style: italic;
+      color: var(--rust);
+    }
+
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 0.4rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+    }
+
+    .card-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .field {
+      margin-bottom: 1.1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      background: var(--cream);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: var(--rust);
+      background: #fff;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--rust);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn:hover { background: var(--rust-light); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .toggle {
+      text-align: center;
+      margin-top: 1.2rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .toggle a {
+      color: var(--rust);
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .toggle a:hover { text-decoration: underline; }
+
+    .message {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      text-align: center;
+      display: none;
+    }
+
+    .message.error {
+      background: #FEE9E4;
+      color: #8B2000;
+      border: 1px solid #F5C4B8;
+      display: block;
+    }
+
+    .message.success {
+      background: #E6F4EC;
+      color: #1A5C33;
+      border: 1px solid #B4DCC4;
+      display: block;
+    }
+
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: var(--border);
+      margin: 1.5rem auto;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 2rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .forgot {
+      text-align: right;
+      margin-top: -0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .forgot a {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .forgot a:hover { color: var(--rust); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="brand">
+      <span class="brand-compass">🧭</span>
+      <div class="brand-title">La Brújula <em>del Lenguaje</em></div>
+      <div class="brand-sub">Sandy the Wondermom</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="form-title">Accede a tus herramientas</div>
+
+      <!-- LOGIN FORM -->
+      <div id="login-form">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="tu@email.com" />
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <input type="password" id="login-password" placeholder="••••••••" />
+        </div>
+        <div class="forgot">
+          <a onclick="showForgot()">¿Olvidaste tu contraseña?</a>
+        </div>
+        <button class="btn" onclick="handleLogin()">Entrar</button>
+        <div class="toggle">
+          ¿Aún no tienes cuenta? <a onclick="showSignup()">Crear cuenta</a>
+        </div>
+      </div>
+
+      <!-- SIGNUP FORM -->
+      <div id="signup-form" style="display:none">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" id="signup-name" placeholder="Tu nombre" />
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="signup-email" placeholder="tu@email.com" />
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <input type="password" id="signup-password" placeholder="Mínimo 6 caracteres" />
+        </div>
+        <button class="btn" onclick="handleSignup()">Crear mi cuenta</button>
+        <div class="toggle">
+          ¿Ya tienes cuenta? <a onclick="showLogin()">Iniciar sesión</a>
+        </div>
+      </div>
+
+      <!-- FORGOT PASSWORD FORM -->
+      <div id="forgot-form" style="display:none">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1rem;text-align:center;">Te enviaremos un enlace para restablecer tu contraseña.</p>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="forgot-email" placeholder="tu@email.com" />
+        </div>
+        <button class="btn" onclick="handleForgot()">Enviar enlace</button>
+        <div class="toggle">
+          <a onclick="showLogin()">Volver al inicio de sesión</a>
+        </div>
+      </div>
+
+      <div class="message" id="msg"></div>
+    </div>
+
+    <div class="footer">
+      © Sandy the Wondermom · Método NeuroMaravilla
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://tcxxfhxdgvxziruwcrfj.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjeHhmaHhkZ3Z4emlydXdjcmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDI5NjIsImV4cCI6MjA5ODMxODk2Mn0.oLi1CGBaf1LuQBElbB5hzt1IRuEEYXrW7qp8doyHod8';
+
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Redirect destination after login
+    const REDIRECT_URL = 'https://sandythewondermom.github.io/bancodemodelado/banco-de-modelado.html';
+
+    function showMsg(text, type) {
+      const el = document.getElementById('msg');
+      el.textContent = text;
+      el.className = 'message ' + type;
+    }
+
+    function clearMsg() {
+      const el = document.getElementById('msg');
+      el.className = 'message';
+    }
+
+    function showLogin() {
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('forgot-form').style.display = 'none';
+      document.getElementById('form-title').textContent = 'Accede a tus herramientas';
+      clearMsg();
+    }
+
+    function showSignup() {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'block';
+      document.getElementById('forgot-form').style.display = 'none';
+      document.getElementById('form-title').textContent = 'Crea tu cuenta';
+      clearMsg();
+    }
+
+    function showForgot() {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('forgot-form').style.display = 'block';
+      document.getElementById('form-title').textContent = 'Restablecer contraseña';
+      clearMsg();
+    }
+
+    async function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) return showMsg('Por favor completa todos los campos.', 'error');
+
+      const btn = document.querySelector('#login-form .btn');
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        showMsg('Email o contraseña incorrectos. Inténtalo de nuevo.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      } else {
+        showMsg('✓ Acceso correcto. Redirigiendo...', 'success');
+        setTimeout(() => { window.location.href = REDIRECT_URL; }, 1000);
+      }
+    }
+
+    async function handleSignup() {
+      const name = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const password = document.getElementById('signup-password').value;
+      if (!name || !email || !password) return showMsg('Por favor completa todos los campos.', 'error');
+      if (password.length < 6) return showMsg('La contraseña debe tener al menos 6 caracteres.', 'error');
+
+      const btn = document.querySelector('#signup-form .btn');
+      btn.disabled = true;
+      btn.textContent = 'Creando cuenta...';
+
+      const { error } = await sb.auth.signUp({
+        email, password,
+        options: { data: { full_name: name } }
+      });
+
+      if (error) {
+        showMsg(error.message, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Crear mi cuenta';
+      } else {
+        showMsg('✓ Cuenta creada. Revisa tu email para confirmar tu acceso.', 'success');
+        btn.disabled = false;
+        btn.textContent = 'Crear mi cuenta';
+      }
+    }
+
+    async function handleForgot() {
+      const email = document.getElementById('forgot-email').value.trim();
+      if (!email) return showMsg('Introduce tu email.', 'error');
+
+      const btn = document.querySelector('#forgot-form .btn');
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      const { error } = await sb.auth.resetPasswordForEmail(email);
+
+      if (error) {
+        showMsg('No pudimos enviar el email. Inténtalo de nuevo.', 'error');
+      } else {
+        showMsg('✓ Email enviado. Revisa tu bandeja de entrada.', 'success');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Enviar enlace';
+    }
+
+    // Check if already logged in
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.href = REDIRECT_URL;
+    });
+  </script>
+</body>
+</html>
