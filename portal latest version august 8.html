@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>La Brújula del Lenguaje™ — Mis Herramientas</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@300;400;500;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F5F0;
+      --white: #FFFFFF;
+      --ink: #2C2C2C;
+      --muted: #7A7A6E;
+      --border: #E0DDD6;
+      --sage: #7A8C72;
+      --sage-bg: #8A9C82;
+      --sage-light: #EEF2EB;
+      --accent: #C4763A;
+      --step-bg: #E8EDE5;
+      --step-text: #5A6E52;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* TOP NAV */
+    .nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .nav-compass { font-size: 1.4rem; }
+
+    .nav-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .nav-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-user {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .btn-logout {
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover {
+      border-color: var(--sage-bg);
+      color: var(--sage-bg);
+    }
+
+    /* MAIN */
+    .main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    /* HEADER */
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-eyebrow {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 0.5rem;
+    }
+
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.4rem;
+    }
+
+    .header-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .header-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* INTRO BANNER */
+    .intro-banner {
+      background: var(--sage-light);
+      border: 1px solid #D4DCCE;
+      border-radius: 12px;
+      padding: 1rem 1.4rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 0.86rem;
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    /* GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 500px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* TOOL CARD */
+    .tool-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      display: block;
+    }
+
+    .tool-card.active:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.09);
+    }
+
+    .tool-card.coming-soon {
+      opacity: 0.7;
+      cursor: default;
+    }
+
+    .card-top {
+      background: var(--sage-bg);
+      padding: 1rem 1.2rem 0.8rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .card-emoji {
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    .badge-soon {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.25);
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+    }
+
+    .badge-new {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--accent);
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+    }
+
+    .card-body {
+      padding: 1rem 1.2rem 1.2rem;
+    }
+
+    .card-number {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 0.25rem;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .card-cta {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--sage-bg);
+    }
+
+    .card-cta-soon {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 2.5rem;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <span class="nav-compass">🧭</span>
+      <div class="nav-title">La Brújula <em>del Lenguaje</em>™</div>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user" id="user-email"></span>
+      <button class="btn-logout" onclick="handleLogout()">Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="header">
+      <div class="header-eyebrow">Sandy the Wondermom</div>
+      <div class="header-title">Mis <em>Herramientas</em></div>
+      <div class="header-sub">Todo lo que necesitas, en un solo lugar</div>
+    </div>
+
+    <div class="intro-banner">
+      Aquí tienes todas las herramientas de La Brújula del Lenguaje™. Cada una está diseñada para acompañarte en un momento concreto del desarrollo del lenguaje de tu hijo.
+    </div>
+
+    <div class="grid">
+
+      <!-- 1. Banco de Modelado — ACTIVA -->
+      <a class="tool-card active" href="https://sandythewondermom.github.io/bancodemodelado/banco-de-modelado.html">
+        <div class="card-top">
+          <span class="card-emoji">🗣️</span>
+          <span class="badge-new">Disponible</span>
+        </div>
+        <div class="card-body">
+          <div class="card-number">Herramienta 5</div>
+          <div class="card-title">El Banco de <em>Modelado</em>™</div>
+          <div class="card-cta">Abrir herramienta →</div>
+        </div>
+      </a>
+
+      <!-- 2. Detector de Bordes — PRÓXIMAMENTE -->
+      <div class="tool-card coming-soon">
+        <div class="card-top">
+          <span class="card-emoji">🔍</span>
+          <span class="badge-soon">Próximamente</span>
+        </div>
+        <div class="card-body">
+          <div class="card-number">Herramienta 1</div>
+          <div class="card-title">El Detector de <em>Bordes</em>™</div>
+          <div class="card-cta-soon">Disponible pronto</div>
+        </div>
+      </div>
+
+      <!-- 3. Semáforo del Lenguaje — PRÓXIMAMENTE -->
+      <div class="tool-card coming-soon">
+        <div class="card-top">
+          <span class="card-emoji">🚦</span>
+          <span class="badge-soon">Próximamente</span>
+        </div>
+        <div class="card-body">
+          <div class="card-number">Herramienta 2</div>
+          <div class="card-title">El Semáforo del <em>Lenguaje</em>™</div>
+          <div class="card-cta-soon">Disponible pronto</div>
+        </div>
+      </div>
+
+      <!-- 4. Mapa de Siguientes Pasos — PRÓXIMAMENTE -->
+      <div class="tool-card coming-soon">
+        <div class="card-top">
+          <span class="card-emoji">🗺️</span>
+          <span class="badge-soon">Próximamente</span>
+        </div>
+        <div class="card-body">
+          <div class="card-number">Herramienta 3</div>
+          <div class="card-title">El Mapa de <em>Siguientes Pasos</em>™</div>
+          <div class="card-cta-soon">Disponible pronto</div>
+        </div>
+      </div>
+
+      <!-- 5. Oportunidades Ocultas — PRÓXIMAMENTE -->
+      <div class="tool-card coming-soon">
+        <div class="card-top">
+          <span class="card-emoji">✨</span>
+          <span class="badge-soon">Próximamente</span>
+        </div>
+        <div class="card-body">
+          <div class="card-number">Herramienta 4</div>
+          <div class="card-title">Las Oportunidades <em>Ocultas</em> de Lenguaje™</div>
+          <div class="card-cta-soon">Disponible pronto</div>
+        </div>
+      </div>
+
+      <!-- 6. Plan de 15 Minutos — PRÓXIMAMENTE -->
+      <div class="tool-card coming-soon">
+        <div class="card-top">
+          <span class="card-emoji">⏱️</span>
+          <span class="badge-soon">Próximamente</span>
+        </div>
+        <div class="card-body">
+          <div class="card-number">Herramienta 6</div>
+          <div class="card-title">Mi Plan de <em>15 Minutos</em>™</div>
+          <div class="card-cta-soon">Disponible pronto</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer">© Sandy the Wondermom · Método NeuroMaravilla</div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://tcxxfhxdgvxziruwcrfj.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjeHhmaHhkZ3Z4emlydXdjcmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDI5NjIsImV4cCI6MjA5ODMxODk2Mn0.oLi1CGBaf1LuQBElbB5hzt1IRuEEYXrW7qp8doyHod8';
+    const LOGIN_URL = 'https://sandythewondermom.github.io/brujula-login/';
+
+    const { createClient } = supabase;
+    const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Check session
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        window.location.replace(LOGIN_URL);
+      } else {
+        document.getElementById('user-email').textContent = session.user.email;
+      }
+    });
+
+    async function handleLogout() {
+      await sb.auth.signOut();
+      window.location.href = LOGIN_URL;
+    }
+  </script>
+</body>
+</html>
